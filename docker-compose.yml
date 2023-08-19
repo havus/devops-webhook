@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  backend_server:
+    container_name: backend_server
+    image: havus/go-webhook-server:1.0-rc
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend_server:
+    image: havus/vue-webhook-client:1.0-rc
+    container_name: frontend_server
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  proxy_server:
+    image: havus/webhook-nginx
+    container_name: proxy_server
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - web-root:/var/www/html
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - dhparam:/etc/ssl/certs
+    depends_on:
+      - backend_server
+      - frontend_server
+    networks:
+      - app-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - proxy_server
+    # https://eff-certbot.readthedocs.io/en/stable/using.html#managing-certificates
+    # command: certonly --webroot --webroot-path=/var/www/html --email havus.it@gmail.com --agree-tos --no-eff-email --staging -d wadaw.space  -d www.wadaw.space
+    command: certonly --webroot --webroot-path=/var/www/html --email havus.it@gmail.com --agree-tos --no-eff-email --force-renewal -d *.wadaw.my.id
+
+volumes:
+  certbot-etc:
+    # accounts  archive  csr  keys  live  renewal  renewal-hooks
+  certbot-var:
+    # blank
+  web-root:
+    # index.html
+  dhparam:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./dhparam/
+      o: bind
+
+networks:
+  app-network:
+    driver: bridge
