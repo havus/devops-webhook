@@ -16,17 +16,19 @@ services:
       - app-network
 
   proxy_server:
-    image: havus/webhook-nginx
+    image: nginx:mainline-alpine
     container_name: proxy_server
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
+      - nginx_conf:etc/nginx/conf.d/:ro
+      - nginx_snippets:etc/nginx/snippets/:ro
+      - dhparam:/etc/ssl/certs
       - web-root:/var/www/html
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
-      - dhparam:/etc/ssl/certs
     depends_on:
       - backend_server
       - frontend_server
@@ -58,6 +60,18 @@ volumes:
     driver_opts:
       type: none
       device: ./dhparam/
+      o: bind
+  nginx_conf:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./nginx/conf.d/
+      o: bind
+  nginx_snippets:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./nginx/snippets/
       o: bind
 
 networks:
