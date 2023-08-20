@@ -1,40 +1,6 @@
 version: '3'
 
 services:
-  backend_server:
-    container_name: backend_server
-    image: havus/go-webhook-server:1.0-rc
-    restart: unless-stopped
-    networks:
-      - app-network
-
-  frontend_server:
-    image: havus/vue-webhook-client:1.0-rc
-    container_name: frontend_server
-    restart: unless-stopped
-    networks:
-      - app-network
-
-  proxy_server:
-    image: nginx:mainline-alpine
-    container_name: proxy_server
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/init-conf.d/:/etc/nginx/conf.d/:ro
-      - ./nginx/snippets/:/etc/nginx/snippets/:ro
-      - ./dhparam/:/etc/ssl/certs
-      - ./web-root/:/var/www/html
-      - ./certbot-etc/:/etc/letsencrypt
-      - ./certbot-var/:/var/lib/letsencrypt
-    depends_on:
-      - backend_server
-      - frontend_server
-    networks:
-      - app-network
-
   certbot:
     image: certbot/certbot
     container_name: certbot
@@ -42,10 +8,4 @@ services:
       - ./certbot-etc/:/etc/letsencrypt
       - ./certbot-var/:/var/lib/letsencrypt
       - ./web-root/:/var/www/html
-    depends_on:
-      - proxy_server
     command: "certonly --webroot --webroot-path=/var/www/html --email=havus.it@gmail.com --agree-tos --no-eff-email --force-renewal -d ${DOMAIN_NAMES}"
-
-networks:
-  app-network:
-    driver: bridge
