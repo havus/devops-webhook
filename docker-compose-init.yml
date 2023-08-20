@@ -21,9 +21,8 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
+      - ./nginx/init-conf.d/:/etc/nginx/conf.d/:ro
       - ./nginx/snippets/:/etc/nginx/snippets/:ro
       - ./dhparam/:/etc/ssl/certs
       - ./web-root/:/var/www/html
@@ -34,6 +33,17 @@ services:
       - frontend_server
     networks:
       - app-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot-etc/:/etc/letsencrypt
+      - ./certbot-var/:/var/lib/letsencrypt
+      - ./web-root/:/var/www/html
+    depends_on:
+      - proxy_server
+    command: "certonly --webroot --webroot-path=/var/www/html --email=havus.it@gmail.com --agree-tos --no-eff-email --staging -d ${DOMAIN_NAMES}"
 
 networks:
   app-network:
