@@ -1,20 +1,6 @@
 version: '3'
 
 services:
-  backend_server:
-    container_name: backend_server
-    image: havus/go-webhook-server:1.0-rc
-    restart: unless-stopped
-    networks:
-      - app-network
-
-  frontend_server:
-    image: havus/vue-webhook-client:1.0-rc
-    container_name: frontend_server
-    restart: unless-stopped
-    networks:
-      - app-network
-
   proxy_server:
     image: nginx:mainline-alpine
     container_name: proxy_server
@@ -28,9 +14,6 @@ services:
       - ./web-root/:/var/www/html
       - ./certbot-etc/:/etc/letsencrypt
       - ./certbot-var/:/var/lib/letsencrypt
-    depends_on:
-      - backend_server
-      - frontend_server
     networks:
       - app-network
 
