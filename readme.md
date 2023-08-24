@@ -4,7 +4,7 @@
 ```sh
 $ cat /etc/apt/sources.list # Check sources.list if using idcloudhost
 $ lsb_release -a # check release version
-$ vim /etc/apt/sources.list # change it to default, search it from google bruh
+$ vim /etc/apt/sources.list # change it to default, ex: https://gist.github.com/hakerdefo/9c99e140f543b5089e32176fe8721f5f
 
 $ sudo apt-get update
 $ sudo apt-get upgrade
@@ -70,7 +70,14 @@ $ crontab -e # select using editor u prefered
 0 1 * * * /home/havus/ssl_renew.sh >> /var/log/cron.log 2>&1
 ```
 
-6. Compose down
+6. Restarting one service
+```sh
+$ docker-compose pull frontend_server
+$ docker-compose up -d --force-recreate --no-deps frontend_server
+$ docker system prune -af
+```
+
+7. Compose down
 ```sh
 $ docker-compose down
 $ docker system prune -af
@@ -78,3 +85,5 @@ $ docker system prune -af
 
 ## Source
 - https://mindsers.blog/post/https-using-nginx-certbot-docker/
+- https://serverfault.com/questions/598202/make-nginx-to-pass-hostname-of-the-upstream-when-reverseproxying
+- https://stackoverflow.com/questions/49316462/how-to-update-existing-images-with-docker-compose
